@@ -1,6 +1,7 @@
 # Extract data from Trello using API
 
 Script to extract summary of recent (last 8 days') card moves from a Trello board.
+
 ## Usage
 
 Run `python extract_recent.py [TRELLO KEY] [TRELLO TOKEN] [BOARD ID]`.

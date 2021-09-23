@@ -87,7 +87,7 @@ def get_cards_from_board(client, board_id, output_file):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Query Trello API for card information"
+        description="Query Trello API for recent card moves in a board"
     )
     parser.add_argument("key", help="Your Trello API key")
     parser.add_argument("token", help="Your Trello service token")
