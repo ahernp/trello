@@ -18,7 +18,7 @@ import re
 from trello import TrelloClient
 from trello.exceptions import ResourceUnavailable
 
-OLDEST_MOVES_TO_EXTRACT = datetime.now(timezone.utc) - timedelta(days=8)
+LAST_ACTIVITY_RANGE_BEGINNING = datetime.now(timezone.utc) - timedelta(days=8)
 
 BOARD_LIST_NAME = "board_list_name"
 CARD_LABEL1_NAME = "card_label1_name"
@@ -44,14 +44,15 @@ def get_cards_from_board(client, board_id, output_file):
     try:
         print("Reading cards from board...")
         board = client.get_board(board_id)
-    except ResourceUnavailable:
-        return f"Error: could not find board with ID: {board_id}"
+        print("Got cards from board")
+    except ResourceUnavailable as e:
+        return f"Error: could not find board with ID: {board_id} ({e})"
 
     board_lists = board.list_lists()
 
     for board_list in board_lists:
         for card in board_list.list_cards():
-            if card.dateLastmoves < OLDEST_MOVES_TO_EXTRACT:
+            if card.dateLastActivity < LAST_ACTIVITY_RANGE_BEGINNING:
                 continue
 
             row = {}
@@ -72,7 +73,13 @@ def get_cards_from_board(client, board_id, output_file):
                     else:
                         row[column.column_name] = f"No value found for {column}"
 
-            card_movements = card.list_movements()
+            try:
+                print(f"List movements for #{card.short_id} {card.name}")
+                card_movements = card.list_movements()
+            except ResourceUnavailable as e:
+                return f"Trello API error {e}. Try one more time again"
+                card_movements = card.list_movements()
+
             if card_movements:
                 card_movements.sort(
                     key=lambda card_movement: card_movement["datetime"],
